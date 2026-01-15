@@ -1,11 +1,18 @@
+import { query } from "express-validator";
 import pool from "../db.js";
 
 
 //READ 
 export const getCategorias = async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM categorias');
-        res.json(rows);
+        const query = `SELECT 
+        id,
+        nombre,
+        from categorias
+        ORDER BY nombre ASC` ;
+        const [rows] = await pool.query(query);
+        res.status(200).json(rows);
+    
     } catch (error) {
         res.status(500).json({message: "No se pudo obtener las categorias", error: error.message})
     }
@@ -22,6 +29,24 @@ export const createCategorias = async (req, res) => {
         res.status(201).json ({id: result.id, nombre});
     }catch (error) {
         res.status(500).json({message: "No se pudo crear la categoria", error: error.message})
+    }
+};
+
+//UPDATE
+export const updateCategorias = async (req, res) => {
+    const { id } = req.params;
+    const {nombre} = req.body;
+    try {
+        const [result] = await pool.query(
+            `Update categorias set nombre = ? where = id ?`, 
+            [nombre, id] 
+        );
+        if (result.affectedRows === 0){
+            return res.status(404).json({message: "No se pudo encontrar esta categoria"});
+        }
+        res.status(200).json({message: "Categoria modificada existosamente"});
+    } catch (error) {
+        res.status(500).json({ message: "No se pudo modificar la categoria", error: error.message})
     }
 };
 

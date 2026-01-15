@@ -4,7 +4,8 @@ import { body, validationResult } from 'express-validator';
 
 export const validateProductCreation = [
     body ('nombre') 
-    .notEmpty().withMessage('El nombre del producto es obligatorio')
+    .trim()
+    .notEmpty().withMessage('No puede estar vacio')
     .isLength ({min: 3, max: 255 }).withMessage ('El nombre del producto debe tener mas de 3 letras'),
 
     body ('precio')

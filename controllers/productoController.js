@@ -3,9 +3,18 @@ import pool from "../db.js";
 //LEER PRODUCTO
 export const getProductos = async (req, res) => {
     try {
-        const query = 'SELECT p.id, p.nombre, p.precio, p.stock, c.nombre AS nombre_categoria, p.categoria_id FROM productos p LEFT JOIN categorias c ON p.categoria_id = c.id';
+        const query = 
+    `SELECT
+     p.id,
+     p.nombre, 
+     p.precio, 
+     p.stock, 
+     c.nombre AS nombre_categoria, 
+     p.categoria_id FROM productos p LEFT JOIN categorias c ON p.categoria_id = c.id`;
+
         const [rows] = await pool.query(query);
-        res.json(rows);
+        res.status(200).json(rows);
+
     } catch (error) {
         res.status(500).json({message: "No se pudo obtener los productos", error: error.message})
     }
@@ -32,7 +41,10 @@ export const updateProducto = async (req, res) => {
     const {nombre, precio, stock, categoria_id} = req.body;
     try {
         const [result] = await pool.query( 
-            'UPDATE productos SET nombre = ?, precio = ?, stock = ?, categoria_id = ? where id = ?', 
+            `UPDATE productos SET nombre = ?, 
+            precio = ?, 
+            stock = ?, 
+            categoria_id = ? where id = ?`, 
             [ nombre, precio, stock, categoria_id, id]
         );
          if (result.affectedRows === 0) {
