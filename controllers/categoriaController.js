@@ -1,6 +1,4 @@
-import { query } from "express-validator";
-import pool from "../db.js";
-
+import { pool } from "../db.js";
 
 //READ 
 export const getCategorias = async (req, res) => {
@@ -38,7 +36,7 @@ export const updateCategorias = async (req, res) => {
     const {nombre} = req.body;
     try {
         const [result] = await pool.query(
-            `Update categorias set nombre = ? where = id ?`, 
+            `UPDATE categorias SET nombre = ? WHERE id = ?`, 
             [nombre, id] 
         );
         if (result.affectedRows === 0){
@@ -55,7 +53,7 @@ export const updateCategorias = async (req, res) => {
  export const deleteCategorias = async(req,res) => {
     const {id} = req.params;
     try { 
-        const [result] = await pool.query ('DELETE FROM categorias where id =?', 
+        const [result] = await pool.query (`DELETE FROM categorias where id =?`, 
             [id]
         );
         if (result.affectedRows === 0) {
