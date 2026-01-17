@@ -1,4 +1,4 @@
-import { pool } from "../db.js";
+import pool from "../db.js";
 
 //READ 
 export const getCategorias = async (req, res) => {
