@@ -20,6 +20,9 @@ app.use(express.json());
 
 import authRouter from './routes/auth.js';
 
+//Imagenes estaticas
+app.use('/uploads', express.static('uploads'));
+
 //ruta autenticacion
 app.use('/api', authRouter);
 
