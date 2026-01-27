@@ -9,7 +9,7 @@ export const getProductos = async (req, res) => {
      p.nombre, 
      p.precio, 
      p.stock, 
-     p.iamgen,
+     p.imagen,
      c.nombre AS nombre_categoria, 
      p.categoria_id FROM productos p LEFT JOIN categorias c ON p.categoria_id = c.id`;
 
@@ -29,7 +29,7 @@ export const createProducto = async (req, res) => {
 
         const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
         const [result] = await pool.query ( 
-            'INSERT INTO productos (nombre, precio, stock, categoria_id, iamgen) VALUES (?, ?, ?, ?,? )',
+            'INSERT INTO productos (nombre, precio, stock, categoria_id, imagen     ) VALUES (?, ?, ?, ?,? )',
             [nombre, precio, stock, categoria_id, imagePath]
         );
         res.status(201).json ({id: result.id,
