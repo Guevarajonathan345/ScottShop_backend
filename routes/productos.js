@@ -13,7 +13,7 @@
     router.put('/:id', protect, validateProductCreation, updateProducto);
     router.delete('/:id', protect, deleteProducto);*/
 
-    router.get('/', protect, getProductos);
+    router.get('/', getProductos);
     router.post('/', protect, admin, upload.single("imagen"), validateProductCreation, createProducto);
     router.put('/:id', protect, admin, upload.single("imagen"), validateProductCreation, updateProducto);
     router.delete('/:id', protect, admin, deleteProducto);
