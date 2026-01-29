@@ -13,7 +13,7 @@ export const getProductos = async (req, res) => {
      c.nombre AS nombre_categoria, 
      p.categoria_id FROM productos p LEFT JOIN categorias c ON p.categoria_id = c.id`;
 
-        const [rows] = await pool.query(query);
+    const [rows] = await pool.query(query);
         res.status(200).json(rows);
 
     } catch (error) {
@@ -25,11 +25,12 @@ export const getProductos = async (req, res) => {
 
 export const createProducto = async (req, res) => {
     const {nombre, precio, stock, categoria_id } = req.body;
+    const imagePath = req.file ? req.file.filename : null;
     try {
 
-        const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+        
         const [result] = await pool.query ( 
-            'INSERT INTO productos (nombre, precio, stock, categoria_id, imagen     ) VALUES (?, ?, ?, ?,? )',
+            'INSERT INTO productos (nombre, precio, stock, categoria_id, imagen ) VALUES (?, ?, ?, ?,? )',
             [nombre, precio, stock, categoria_id, imagePath]
         );
         res.status(201).json ({id: result.id,
@@ -47,34 +48,24 @@ export const createProducto = async (req, res) => {
 export const updateProducto = async (req, res) => {
     const { id } = req.params;
     const {nombre, precio, stock, categoria_id} = req.body;
+    const imagePath = req.file ? req.file.filename : null;
+
     try {
+        let query = `UPDATE productos SET nombre =?, precio =?, stock =?, categoria_id =?`
+        ;
+        let values = [nombre, precio, stock, categoria_id];
 
-        const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
-
-        let query;
-        let values;
-
-        if (imagePath ) {
-            query = `UPDATE productos SET nombre = ?, 
-            precio = ?, 
-            stock = ?, 
-            categoria_id = ?,
-            imagen =?,
-            where id = ?`, 
-          values =  [ nombre, precio, stock, categoria_id, imagePath, id];
-        } else {
-            query = `UPDATE productos SET nombre = ?, 
-            precio = ?, 
-            stock = ?, 
-            categoria_id = ?,
-            where id = ?`, 
-          values =  [ nombre, precio, stock, categoria_id, id];
-
+        if (imagePath) {
+            query += `, imagen =?`;
+            values.push (imagePath);
         }
+
+        query += ` WHERE id =? `;
+        values.push(id);
 
         const [result] = await pool.query( query, values ); 
         
-         if (result.affectedRows === 0) {
+        if (result.affectedRows === 0) {
             // Si affectedRows es 0, significa que el ID no existía
             return res.status(404).json({ message: `Producto con ID ${id} no encontrado para actualizar.` });
         }

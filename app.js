@@ -5,11 +5,12 @@ import categoriasRoute from './routes/categorias.js';
 import cors from 'cors';
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 //Middleware CORS (Necesario para la comunicación entre puertos)
 app.use(cors({
-    origin: 'http://localhost:5173' // Puerto predeterminado de Vite/React
+    origin: process.env.FRONT_URL,
+    credentials: true // Puerto predeterminado de Vite/React
 }));
 
 //PARSEAR COMO JSON
