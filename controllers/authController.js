@@ -4,11 +4,17 @@ import jwt from 'jsonwebtoken'
 
 //Generar jwt 
 
-const generateToken = (id) => {
+const generateAccessToken = (id) => {
     //firma token con ID para usuario
     return jwt.sign({ id }, process.env.JWT_SECRET, {
-        expiresIn: '1d' //expiracion de token
+        expiresIn: '15min' //expiracion de token
     }); 
+};
+
+const generateRefreshToken = (id) => {
+    return jwt.sign ({ id }, process.env.JWT_SECRET, {
+        expiresIn: '7d' //expiracion de refresh token
+    });
 };
 
 
@@ -53,26 +59,29 @@ export const registerUser = async (req, res) => {
 
 export const loginUser = async (req, res) => {
     const { email, password } = req.body;
-    try {
     //verifica
     const [users] = await pool.query('SELECT * FROM usuarios WHERE email = ?', [email]);
     const user = users[0];
 
-    //verifica existencia y pass
-    if (user && (await bcrypt.compare(password, user.password))) {
-        res.json({
-            id: user.id,
-            nombre: user.nombre,
-            email: user.email,
-            rol: user.rol,
-            token: generateToken(user.id),
-        });
-    } else {
-        //fallo credenciales
-        res.status(401).json({message: 'Credenciales incorrectas'});
-    }
-    } catch (error) {
-        console.error("Error al iniciar sesion", error.message);
-        res.status(500).json({message: 'Error en el servidor al iniciar sesion', error: error.message});
-    }
+    if (!user) return res.status(401).json({ message: 'Credenciales incorrectas' });
+9
+    const match =await bcrypt.compare (password, user.password);
+    if (!match) return res.status(401).json({ message: "Error de credenciales"});
+
+    const accessToken = generateAccessToken (user.id);
+    const refreshToken = generateRefreshToken (user.id);
+
+    res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: false, //true en produccion
+        sameSite: 'strict',
+        maxAge: 7 * 24 *60 *60 *1000, //7 dias
+    });
+
+    res.json({
+        id: user.id,
+        nombre: user.nombre,
+        rol: user.rol,
+        token: accessToken,
+    });
 };
