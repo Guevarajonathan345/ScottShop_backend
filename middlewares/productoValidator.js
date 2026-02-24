@@ -17,6 +17,9 @@ export const validateProductCreation = [
     body ('categoria_id')
     .isInt({ gt: 0 }).withMessage('La ID de categoría debe ser un número entero válido.'),
 
+    body ('descripcion') 
+    .notEmpty().withMessage('No puede estar vacio'),
+
      // Middleware que verifica y maneja los errores
     (req, res, next) => {
         const errors = validationResult(req);
