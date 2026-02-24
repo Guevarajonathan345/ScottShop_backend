@@ -10,7 +10,7 @@ export const getProductos = async (req, res) => {
      p.precio, 
      p.stock, 
      p.imagen,
-     p.descripcion
+     p.descripcion,
      c.nombre AS nombre_categoria, 
      p.categoria_id FROM productos p LEFT JOIN categorias c ON p.categoria_id = c.id`;
 
@@ -31,7 +31,7 @@ export const createProducto = async (req, res) => {
 
         
         const [result] = await pool.query ( 
-            'INSERT INTO productos (nombre, precio, stock, categoria_id, descripcion, imagen ) VALUES (?, ?, ?, ?,? )',
+            'INSERT INTO productos (nombre, precio, stock, categoria_id, descripcion, imagen ) VALUES (?, ?, ?, ?,?,? )',
             [nombre, precio, stock, categoria_id, descripcion, imagePath]
         );
         res.status(201).json ({id: result.id,
