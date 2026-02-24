@@ -10,6 +10,7 @@ export const getProductos = async (req, res) => {
      p.precio, 
      p.stock, 
      p.imagen,
+     p.descripcion
      c.nombre AS nombre_categoria, 
      p.categoria_id FROM productos p LEFT JOIN categorias c ON p.categoria_id = c.id`;
 
@@ -24,20 +25,21 @@ export const getProductos = async (req, res) => {
 //CREAR PRODUCTOS
 
 export const createProducto = async (req, res) => {
-    const {nombre, precio, stock, categoria_id } = req.body;
+    const {nombre, precio, stock, categoria_id, descripcion } = req.body;
     const imagePath = req.file ? req.file.filename : null;
     try {
 
         
         const [result] = await pool.query ( 
-            'INSERT INTO productos (nombre, precio, stock, categoria_id, imagen ) VALUES (?, ?, ?, ?,? )',
-            [nombre, precio, stock, categoria_id, imagePath]
+            'INSERT INTO productos (nombre, precio, stock, categoria_id, descripcion, imagen ) VALUES (?, ?, ?, ?,? )',
+            [nombre, precio, stock, categoria_id, descripcion, imagePath]
         );
         res.status(201).json ({id: result.id,
             nombre,
             precio,
             stock,
             categoria_id,
+            descripcion,
             imagen: imagePath});
     }catch (error) {
         res.status(500).json({message: "No se pudo crear el producto", error: error.message})
@@ -47,13 +49,13 @@ export const createProducto = async (req, res) => {
 
 export const updateProducto = async (req, res) => {
     const { id } = req.params;
-    const {nombre, precio, stock, categoria_id} = req.body;
+    const {nombre, precio, stock, categoria_id, descripcion} = req.body;
     const imagePath = req.file ? req.file.filename : null;
 
     try {
-        let query = `UPDATE productos SET nombre =?, precio =?, stock =?, categoria_id =?`
+        let query = `UPDATE productos SET nombre =?, precio =?, stock =?, categoria_id =?, descripcion=?`
         ;
-        let values = [nombre, precio, stock, categoria_id];
+        let values = [nombre, precio, stock, categoria_id, descripcion];
 
         if (imagePath) {
             query += `, imagen =?`;
