@@ -2,9 +2,9 @@ import pool from "../db.js";
 
 //LEER PRODUCTO
 export const getProductos = async (req, res) => {
-    const { categoria } = req.query;
+    const { categoria, search } = req.query;
     try {
-        const query = 
+    let query = 
     `SELECT
      p.id,
      p.nombre, 
@@ -13,14 +13,29 @@ export const getProductos = async (req, res) => {
      p.imagen,
      p.descripcion,
      c.nombre AS nombre_categoria, 
-     p.categoria_id FROM productos p LEFT JOIN categorias c ON p.categoria_id = c.id`;
+     p.categoria_id 
+     FROM productos p LEFT JOIN categorias c ON p.categoria_id = c.id`;
 
-     if(categoria) {
-        query += `WHERE c.nombre = ?`;
-        value.push(categoria);
+     const values =[];
+     const conditions = [];
+
+   
+    if(categoria) {
+        conditions.push("c.nombre = ?");
+        values.push(categoria);
      }
 
-    const [rows] = await pool.query(query);
+    if (search) {
+        conditions.push("p.nombre LIKE ?");
+        values.push(`%${search}%`);
+     }
+
+     if (conditions.length > 0) {
+        query += " WHERE " + conditions.join(" AND ");
+     }
+     
+
+    const [rows] = await pool.query(query, values );
         res.status(200).json(rows);
 
     } catch (error) {
