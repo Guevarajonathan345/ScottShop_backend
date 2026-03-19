@@ -8,12 +8,6 @@ export const validateProductCreation = [
     .notEmpty().withMessage('No puede estar vacio')
     .isLength ({min: 3, max: 255 }).withMessage ('El nombre del producto debe tener mas de 3 letras'),
 
-    body ('precio')
-    .isFloat({ gt: 0 }).withMessage('El precio debe ser un número positivo' ),
-
-    body ('stock')
-    .isInt({ gt: -1 }).withMessage('El stock debe ser un numero entero positivo'),
-
     body ('categoria_id')
     .isInt({ gt: 0 }).withMessage('La ID de categoría debe ser un número entero válido.'),
 
