@@ -1,7 +1,9 @@
 import pool from "../db.js";
 
 
-// GET PRODUCTOS (CON VARIANTES)
+// =====================================
+// 🟢 GET PRODUCTOS (LISTA + FILTROS)
+// =====================================
 export const getProductos = async (req, res) => {
   const { categoria, search } = req.query;
 
@@ -15,7 +17,7 @@ export const getProductos = async (req, res) => {
         c.nombre AS nombre_categoria,
         p.categoria_id,
 
-        v.id AS variante_id,
+        v.id AS variantes_id,
         v.almacenamiento,
         v.ram,
         v.precio,
@@ -24,17 +26,19 @@ export const getProductos = async (req, res) => {
 
       FROM productos p
       LEFT JOIN categorias c ON p.categoria_id = c.id
-      LEFT JOIN producto_variantes v ON p.id = v.product_id
+      LEFT JOIN productos_variantes v ON p.id = v.product_id
     `;
 
     const values = [];
     const conditions = [];
 
+    // FILTRO CATEGORIA
     if (categoria) {
       conditions.push("c.nombre = ?");
       values.push(categoria);
     }
 
+    // FILTRO BUSQUEDA
     if (search) {
       conditions.push("p.nombre LIKE ?");
       values.push(`%${search}%`);
@@ -46,8 +50,7 @@ export const getProductos = async (req, res) => {
 
     const [rows] = await pool.query(query, values);
 
-    
-    // AGRUPAR PRODUCTOS
+    // AGRUPAR
     const productosMap = {};
 
     rows.forEach((row) => {
@@ -63,9 +66,9 @@ export const getProductos = async (req, res) => {
         };
       }
 
-      if (row.variant_id) {
+      if (row.variantes_id) {
         productosMap[row.product_id].variantes.push({
-          id: row.variant_id,
+          id: row.variantes_id,
           almacenamiento: row.almacenamiento,
           ram: row.ram,
           precio: row.precio,
@@ -75,8 +78,7 @@ export const getProductos = async (req, res) => {
       }
     });
 
-
-    // CONVERTIR A ARRAY + PRECIO MINIMO
+    // PRECIO MINIMO
     const productos = Object.values(productosMap).map((product) => {
       const precios = product.variantes.map((v) => v.precio);
 
@@ -86,7 +88,7 @@ export const getProductos = async (req, res) => {
       };
     });
 
-    res.status(200).json(productos);
+    res.json(productos);
 
   } catch (error) {
     res.status(500).json({
@@ -97,7 +99,86 @@ export const getProductos = async (req, res) => {
 };
 
 
-// CREAR PRODUCTO (SIN PRECIO NI STOCK)
+// =====================================
+// 🔵 GET PRODUCTO POR ID (DETALLE)
+// =====================================
+export const getProductoById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const query = `
+      SELECT
+        p.id AS product_id,
+        p.nombre,
+        p.imagen,
+        p.descripcion,
+        c.nombre AS nombre_categoria,
+        p.categoria_id,
+
+        v.id AS variantes_id,
+        v.almacenamiento,
+        v.ram,
+        v.precio,
+        v.stock,
+        v.sku
+
+      FROM productos p
+      LEFT JOIN categorias c ON p.categoria_id = c.id
+      LEFT JOIN productos_variantes v ON p.id = v.product_id
+      WHERE p.id = ?
+    `;
+
+    const [rows] = await pool.query(query, [id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        message: "Producto no encontrado",
+      });
+    }
+
+    const producto = {
+      id: rows[0].product_id,
+      nombre: rows[0].nombre,
+      imagen: rows[0].imagen,
+      descripcion: rows[0].descripcion,
+      nombre_categoria: rows[0].nombre_categoria,
+      categoria_id: rows[0].categoria_id,
+      variantes: [],
+    };
+
+    rows.forEach((row) => {
+      if (row.variantes_id) {
+        producto.variantes.push({
+          id: row.variantes_id,
+          almacenamiento: row.almacenamiento,
+          ram: row.ram,
+          precio: row.precio,
+          stock: row.stock,
+          sku: row.sku,
+        });
+      }
+    });
+
+    const precios = producto.variantes.map((v) => v.precio);
+
+    producto.precio_min = precios.length
+      ? Math.min(...precios)
+      : null;
+
+    res.json(producto);
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al obtener el producto",
+      error: error.message,
+    });
+  }
+};
+
+
+// =====================================
+// 🟡 CREATE PRODUCTO
+// =====================================
 export const createProducto = async (req, res) => {
   const { nombre, categoria_id, descripcion } = req.body;
   const imagePath = req.file ? req.file.filename : null;
@@ -125,7 +206,9 @@ export const createProducto = async (req, res) => {
 };
 
 
-// UPDATE PRODUCTO (SIN PRECIO NI STOCK)
+// =====================================
+// 🟠 UPDATE PRODUCTO
+// =====================================
 export const updateProducto = async (req, res) => {
   const { id } = req.params;
   const { nombre, categoria_id, descripcion } = req.body;
@@ -151,32 +234,33 @@ export const updateProducto = async (req, res) => {
 
     if (result.affectedRows === 0) {
       return res.status(404).json({
-        message: `Producto con ID ${id} no encontrado`,
+        message: "Producto no encontrado",
       });
     }
 
-    res.status(200).json({
-      message: "Producto actualizado correctamente",
-    });
+    res.json({ message: "Producto actualizado" });
 
   } catch (error) {
     res.status(500).json({
-      message: "No se pudo modificar el producto",
+      message: "Error al actualizar producto",
       error: error.message,
     });
   }
 };
 
 
-// DELETE PRODUCTO
+// =====================================
+// 🔴 DELETE PRODUCTO
+// =====================================
 export const deleteProducto = async (req, res) => {
   const { id } = req.params;
 
   try {
-    // Primero eliminar variantes
-    await pool.query("DELETE FROM product_variants WHERE product_id = ?", [id]);
+    await pool.query(
+      "DELETE FROM productos_variantes WHERE product_id = ?",
+      [id]
+    );
 
-    // Luego eliminar producto
     const [result] = await pool.query(
       "DELETE FROM productos WHERE id = ?",
       [id]
@@ -188,13 +272,11 @@ export const deleteProducto = async (req, res) => {
       });
     }
 
-    res.json({
-      message: "Producto eliminado correctamente",
-    });
+    res.json({ message: "Producto eliminado" });
 
   } catch (error) {
     res.status(500).json({
-      message: "No se pudo eliminar el producto",
+      message: "Error al eliminar producto",
       error: error.message,
     });
   }

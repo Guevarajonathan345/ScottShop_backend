@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import productosRoute from './routes/productos.js';
 import categoriasRoute from './routes/categorias.js';
+import variantesRoute from 'route/variantes.js';
 import cors from 'cors';
 
 const app = express();
@@ -27,6 +28,7 @@ app.use('/api', authRouter);
 //USAR RUTAS
 app.use('/api/productos', productosRoute);
 app.use('/api/categorias', categoriasRoute);
+app.use('/api/variantes', variantesRoute);
 
 import { notFound, errorHandler } from './middlewares/errorHandler.js'
 
