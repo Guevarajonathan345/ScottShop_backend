@@ -1,9 +1,9 @@
-import { Route } from 'express';
+import { Router } from 'express';
 import { createVariantes, updateVariantes, deleteVariantes } from '../controllers/VariantesController.js';
 import { validateVariantesCreation } from '../middlewares/variantesValidator.js';
 import { protect, admin } from '../middlewares/authMiddleware.js';
 
-const router = Route ();
+const router = Router();
 
 //Rutas
 router.post ('/', protect, admin, validateVariantesCreation, createVariantes);

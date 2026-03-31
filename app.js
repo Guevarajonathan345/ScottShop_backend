@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import productosRoute from './routes/productos.js';
 import categoriasRoute from './routes/categorias.js';
-import variantesRoute from 'route/variantes.js';
+import variantesRoute from './routes/variantes.js';
 import cors from 'cors';
 
 const app = express();

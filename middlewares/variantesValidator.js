@@ -1,6 +1,6 @@
 import { body, validationResult } from 'express-validator';
 
-export const validateVariantUpdate = [
+export const validateVariantesCreation = [
     body('product_id').isInt().withMessage('ID de producto invalido o no entero'),
     body('almacenamiento').notEmpty(),
     body('ram').notEmpty(),
