@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createVariantes, updateVariantes, deleteVariantes } from '../controllers/VariantesController.js';
+import { createVariantes, updateVariantes, deleteVariantes } from '../controllers/varianteController.js';
 import { validateVariantesCreation } from '../middlewares/variantesValidator.js';
 import { protect, admin } from '../middlewares/authMiddleware.js';
 
