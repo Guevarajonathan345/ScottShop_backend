@@ -1,8 +1,7 @@
 import pool from "../db.js";
 
-
 // =====================================
-// 🟢 GET PRODUCTOS (LISTA + FILTROS)
+//  OBTENER PRODUCTOS (LISTA + FILTROS)
 // =====================================
 export const getProductos = async (req, res) => {
   const { categoria, search } = req.query;
@@ -100,7 +99,7 @@ export const getProductos = async (req, res) => {
 
 
 // =====================================
-// 🔵 GET PRODUCTO POR ID (DETALLE)
+//  OBTENER PRODUCTO POR ID (DETALLE)
 // =====================================
 export const getProductoById = async (req, res) => {
   const { id } = req.params;
@@ -177,7 +176,7 @@ export const getProductoById = async (req, res) => {
 
 
 // =====================================
-// 🟡 CREATE PRODUCTO
+//  CREAR PRODUCTO
 // =====================================
 export const createProducto = async (req, res) => {
   const { nombre, categoria_id, descripcion } = req.body;
@@ -207,7 +206,7 @@ export const createProducto = async (req, res) => {
 
 
 // =====================================
-// 🟠 UPDATE PRODUCTO
+//  ACTUALIZAR PRODUCTO
 // =====================================
 export const updateProducto = async (req, res) => {
   const { id } = req.params;
@@ -250,7 +249,7 @@ export const updateProducto = async (req, res) => {
 
 
 // =====================================
-// 🔴 DELETE PRODUCTO
+// ELIMINAR PRODUCTO
 // =====================================
 export const deleteProducto = async (req, res) => {
   const { id } = req.params;
